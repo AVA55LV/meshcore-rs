@@ -4,6 +4,7 @@ on:
     branches: [qa/ota-app-1.2]
 permissions:
   contents: read
+  actions: read
 env:
   GH_TOKEN: ${{ github.token }}
 jobs:
@@ -11,6 +12,11 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 12
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 45210015282
+          name: desktop-x86
       - shell: powershell
         run: |
           $ErrorActionPreference='Stop'
@@ -32,7 +38,7 @@ jobs:
           if($platform){$scan=Join-Path $platform.FullName 'MpCmdRun.exe'}
           $start=Get-Date
           try {
-            Invoke-WebRequest -UseBasicParsing https://api.github.com/repos/AVA55LV/meshcore-rs/releases/assets/783565494 -Headers @{Authorization="Bearer $env:GH_TOKEN";Accept="application/octet-stream"} -OutFile $path
+            Copy-Item MeshCore-Windows-x86-x64.exe $path
             & $scan -CheckExclusion -path $path
             if($LASTEXITCODE -ne 1){throw "Path exclusion check did not confirm a scannable file: $LASTEXITCODE"}
             $hash=(Get-FileHash $path).Hash
@@ -49,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          gh api -H 'Accept: application/octet-stream' repos/AVA55LV/meshcore-rs/releases/assets/783564901 > app.apk
+          curl -fLsS https://github.com/AVA55LV/meshcore-rs/releases/download/ota-app-v1.2/ota-app-1.2-Android.apk -o app.apk
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
