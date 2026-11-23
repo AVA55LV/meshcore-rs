@@ -52,7 +52,7 @@ jobs:
           PY
           sed 's/name="MeshCore",console/target_arch="universal2",name="MeshCore",console/' MeshCore.spec > Universal.spec
           python -m PyInstaller --clean --noconfirm Universal.spec
-          lipo -verify_arch arm64 x86_64 dist/MeshCore.app/Contents/MacOS/MeshCore
+          lipo dist/MeshCore.app/Contents/MacOS/MeshCore -verify_arch arm64 x86_64
           dist/MeshCore.app/Contents/MacOS/MeshCore --smoke-test
           mkdir -p out
           ditto -c -k --sequesterRsrc --keepParent dist/MeshCore.app out/MeshCore-macOS-Apple-Silicon.zip
