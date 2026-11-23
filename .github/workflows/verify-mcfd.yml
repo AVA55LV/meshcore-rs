@@ -8,6 +8,23 @@ permissions:
 env:
   GH_TOKEN: ${{ github.token }}
 jobs:
+  mac:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c79e840
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: arm64
+      - working-directory: tools/desktop-flasher
+        run: bash build.sh arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-arm64
+          path: tools/desktop-flasher/out/MeshCore-macOS-Apple-Silicon.zip
   check:
     runs-on: windows-2025
     timeout-minutes: 12
